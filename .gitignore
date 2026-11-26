@@ -1,0 +1,20 @@
+# Entorno de Python
+.venv/
+__pycache__/
+*.pyc
+
+# Resultados de simulación: se regeneran con sim.run_sim.
+# Los Excel de uso (data/uso/) sí se versionan: son los años fijos del proyecto.
+data/*/
+!data/uso/
+
+# Ficheros temporales del sistema y de Office
+.DS_Store
+Thumbs.db
+~$*
+
+# Material personal de referencia de estilo, ajeno al proyecto
+referencias/estilo/
+
+CLAUDE.md
+CONTEXTO.md

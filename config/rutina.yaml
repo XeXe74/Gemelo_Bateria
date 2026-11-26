@@ -1,0 +1,92 @@
+# Rutina del usuario y parámetros del simulador.
+# Las horas van en formato "HH:MM". Los rangos [a, b] se muestrean uniformemente.
+# Los consumos son estimaciones iniciales (en % por hora con la batería nueva)
+# y se calibrarán con los 10 días reales de Ajustes -> Batería.
+
+movil:
+  modelo: iPhone 15
+  capacidad_mah: 3349
+  salud_inicial: 0.86          # 86 % en Ajustes -> Batería
+  edad_dias_inicial: 790       # ~2 años y 2 meses desde la compra (aprox.)
+  precio_cambio_bateria_eur: 109
+
+simulacion:
+  paso_min: 15
+  fecha_inicio: "2026-11-16"   # lunes
+  nivel_inicial: 80
+
+# Consumo medio por actividad (% por hora) y su dispersión relativa entre días.
+consumos:
+  dormir:       {media: 1.2,  en_casa: true}   # captura del lunes 23/11: ~48 % -> ~39 % de 2:00 a 10:00 sin cargar
+  casa:         {media: 2.8,  en_casa: true}   # ajustado con la captura de la semana 19-25/11/2026
+  clase:        {media: 2.5,  en_casa: false}   # el usuario: «en clase no suelo gastar mucho»
+  # Lunes: comparte datos con el portátil; 4 h ≈ 40–50 % (usuario), pero «a veces no comparto tanto».
+  # variabilidad: dispersión extra de esta actividad de un día a otro (sigma lognormal).
+  clase_datos:  {media: 11.25, en_casa: false, variabilidad: 0.25}
+  carplay:      {media: 18.75, en_casa: false}  # CarPlay inalámbrico; 40 min ≈ 10–15 % (usuario)
+  gimnasio:     {media: 4.0,  en_casa: false}   # música con auriculares
+  social:       {media: 10.0, en_casa: false}   # café, tomar algo: redes, fotos, mensajes
+  cena:         {media: 7.0,  en_casa: false}
+  cine:         {media: 1.0,  en_casa: false}
+  noche_fuera:  {media: 9.0,  en_casa: false}
+  salida_corta: {media: 6.0,  en_casa: false}
+  dia_fuera:    {media: 7.0,  en_casa: false}   # viaje o día entero fuera, con mapas
+variabilidad_diaria: 0.15      # multiplicador lognormal por día (sigma)
+ruido_paso: 0.25               # ruido relativo por paso de 15 min
+
+# Horarios base por día de la semana (0 = lunes ... 6 = domingo).
+horarios:
+  despertar: ["09:00", "10:00"]
+  despertar_viernes: ["08:15", "08:45"]   # clase a las 10 con 40 min de coche
+  acostarse: ["00:30", "01:30"]           # del día siguiente
+  horas_sueno_min: 7
+
+# Bloques fijos. Todos aparecen en el calendario salvo que se indique p_calendario.
+bloques_fijos:
+  - {dias: [0, 2], inicio: "14:20", fin: "15:00", actividad: carplay, titulo: "Coche a clase"}
+  - {dias: [0],    inicio: "15:00", fin: "19:00", actividad: clase_datos, titulo: "Clase"}
+  - {dias: [2],    inicio: "15:00", fin: "19:00", actividad: clase,   titulo: "Clase"}
+  - {dias: [0, 2], inicio: "19:00", fin: "19:40", actividad: carplay, titulo: "Coche de vuelta"}
+  - {dias: [4],    inicio: "09:20", fin: "10:00", actividad: carplay, titulo: "Coche a clase"}
+  - {dias: [4],    inicio: "10:00", fin: "14:00", actividad: clase,   titulo: "Clase"}
+  - {dias: [4],    inicio: "14:00", fin: "14:40", actividad: carplay, titulo: "Coche de vuelta"}
+  - {dias: [1, 3], inicio: ["17:00", "19:00"], duracion_h: 2, actividad: gimnasio,
+     titulo: "Gimnasio", p_calendario: 0.5}
+  # Salida del sábado: empieza entre 21:30 y 23:00 y termina entre 4:30 y 5:30.
+  - {dias: [5],    inicio_rango: ["21:30", "23:00"], fin_rango: ["04:30", "05:30"],
+     actividad: noche_fuera, titulo: "Salida", p_calendario: 0.7}
+  # Domingo: a veces una salida corta de ~1 h hacia la 1.
+  - {dias: [6],    inicio: "13:00", duracion_h: 1, actividad: salida_corta,
+     titulo: "Salida corta", p_ocurre: 0.5, p_calendario: 0.2}
+
+# Eventos aleatorios. p = probabilidad por día en los días indicados.
+eventos:
+  - {nombre: cafe,     dias: [0, 1, 2, 3, 4, 6], p: 0.30, ventana: ["16:00", "21:30"],
+     duracion_h: [1, 2],   actividad: social, titulo: "Café",          p_calendario: 0.2}
+  - {nombre: tomar_algo, dias: [4, 6],        p: 0.25, ventana: ["20:00", "23:00"],
+     duracion_h: [2, 3],   actividad: cena,   titulo: "Tomar algo / cena", p_calendario: 0.5}
+  - {nombre: cine,     dias: [4, 5, 6],       p: 0.10, ventana: ["17:00", "20:30"],
+     duracion_h: [2.5, 2.5], actividad: cine, titulo: "Cine",           p_calendario: 0.6}
+  - {nombre: dia_fuera, dias: [5, 6],         p: 0.06, ventana: ["10:30", "11:30"],
+     duracion_h: [8, 10],  actividad: dia_fuera, titulo: "Día fuera",   p_calendario: 0.9}
+
+# Comportamiento de carga del usuario.
+carga:
+  potencia: rapida             # cargador de 20 W
+  emergencia_umbral: 10        # en casa y por debajo de este nivel: enchufa ("salvo que me quede sin batería")
+  emergencia_hasta: 80
+  # Antes de salir >= 3 h, carga en la hora previa si no le llega para la salida + margen.
+  previa_salida_min_h: 3
+  margen_salida: 20
+  incidente_umbral: 5          # fuera de casa y por debajo de esto: incidente
+  # Cargas fuera de casa (lo cuenta el usuario, 26/11/2026).
+  # factor_velocidad: fracción de la velocidad del cargador de 20 W de casa.
+  coche: # «cargo en el coche si lo necesito, es indiferente el día»
+    actividades: [carplay]
+    umbral: 50 # supuesto: lo enchufa si va por debajo del 50 %
+    factor_velocidad: 0.8 # captura del lunes 23/11: de ~17 % a ~61 % en ~50 min con CarPlay
+  clase: # «si me estoy quedando sin batería, lo cargo en clase»
+    actividades: [clase, clase_datos]
+    umbral: 20
+    hasta: 50
+    factor_velocidad: 0.4 # portátil o enchufe, carga lenta
