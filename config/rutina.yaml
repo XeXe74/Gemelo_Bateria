@@ -7,7 +7,7 @@ movil:
   modelo: iPhone 15
   capacidad_mah: 3349
   salud_inicial: 0.86          # 86 % en Ajustes -> Batería
-  edad_dias_inicial: 790       # ~2 años y 2 meses desde la compra (aprox.)
+  edad_dias_inicial: 1005 # días desde la fabricación de la batería (febrero de 2024) hasta el 16/11/2026; en uso desde mayo de 2024
   precio_cambio_bateria_eur: 109
 
 simulacion:

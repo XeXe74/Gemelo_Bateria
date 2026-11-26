@@ -1,0 +1,254 @@
+{
+  "id": "GDB-MAQ",
+  "version": "1.1",
+  "fecha": "2026-11-26",
+  "descripcion": "Maqueta digital del gemelo de la batería de un smartphone: estructura jerárquica del activo y de su entorno, con atributos, señales, modelos, documentación y configuración.",
+  "modelo_3d": "modelo_3d.glb",
+  "unidades_3d": "metros",
+  "elementos": [
+    {
+      "id": "ACT1",
+      "nombre": "Móvil y cargador del usuario",
+      "tipo": "activo",
+      "padre": null,
+      "atributos": {
+        "descripcion": "Activo del gemelo: el móvil del usuario, con su batería, y el cargador inteligente con el que se carga por la noche."
+      },
+      "senales": [],
+      "modelos": [],
+      "documentacion": [
+        "GDB-CONOPS",
+        "GDB-IDS-ACT"
+      ],
+      "geometria": {
+        "nodo_gltf": "ACT1",
+        "traslacion_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "PHONE1",
+      "nombre": "Teléfono móvil",
+      "tipo": "equipo",
+      "padre": "ACT1",
+      "atributos": {
+        "fabricante": "Apple",
+        "modelo": "iPhone 15",
+        "numero_serie": "No se incluye por ser un dato personal; consta en Ajustes → General → Información",
+        "version_ios": "27.2.1 (26/11/2026)",
+        "dimensiones_mm": [
+          71.6,
+          147.6,
+          7.8
+        ],
+        "peso_g": 171,
+        "conector": "USB-C",
+        "limites_de_carga_disponibles_pct": [
+          80,
+          85,
+          90,
+          95,
+          100
+        ],
+        "en_uso_desde": "mayo de 2024"
+      },
+      "senales": [
+        "PHONE1.status.plugged"
+      ],
+      "modelos": [
+        "MOD-001"
+      ],
+      "documentacion": [
+        "Apple: iPhone 15 - Especificaciones técnicas",
+        "GDB-IDS-ACT"
+      ],
+      "geometria": {
+        "nodo_gltf": "PHONE1",
+        "traslacion_m": [
+          0.0,
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "id": "BAT1",
+      "nombre": "Batería",
+      "tipo": "componente_sustituible",
+      "padre": "PHONE1",
+      "atributos": {
+        "quimica": "ion litio",
+        "capacidad_nominal_mAh": 3349,
+        "fuente_capacidad": "Dato del proyecto (GDB-CONOPS); Apple no publica la capacidad en sus especificaciones",
+        "as_designed": {
+          "salud_pct": 100
+        },
+        "as_built": {
+          "fecha": "2026-11-16",
+          "salud_pct": 86,
+          "fuente_salud": "Ajustes → Batería del iPhone",
+          "recuento_de_ciclos": 610,
+          "fecha_de_fabricacion": "febrero de 2024",
+          "primer_uso": "mayo de 2024",
+          "fecha_recuento_de_ciclos": "2026-11-26",
+          "antiguedad_desde_fabricacion_dias": 1005,
+          "fuente_ciclos_y_fechas": "Ajustes → General → Información del iPhone"
+        },
+        "umbral_de_sustitucion_pct": 80,
+        "coste_de_sustitucion_eur": 109
+      },
+      "senales": [
+        "PHONE1.BAT1.level",
+        "PHONE1.BAT1.temperature",
+        "PHONE1.BAT1.soh"
+      ],
+      "modelos": [
+        "MOD-002"
+      ],
+      "tareas_de_mantenimiento": [
+        {
+          "id": "MNT-01",
+          "tarea": "Sustitución de la batería en el servicio técnico oficial",
+          "condicion": "Salud estimada por debajo del 80 %",
+          "aviso_previo": "60 días antes de la fecha estimada (REQ-0180, capacidad SOS-02)",
+          "coste_eur": 109
+        }
+      ],
+      "documentacion": [
+        "GDB-IDS-ACT"
+      ],
+      "geometria": {
+        "nodo_gltf": "BAT1",
+        "traslacion_m": [
+          0.0,
+          -0.012,
+          0.0
+        ],
+        "medidas": "aproximadas"
+      }
+    },
+    {
+      "id": "CHARGER1",
+      "nombre": "Cargador inteligente",
+      "tipo": "equipo",
+      "padre": "ACT1",
+      "atributos": {
+        "naturaleza": "Simulado. En un despliegue real sería un cargador o enchufe inteligente capaz de cortar la carga al alcanzar un límite.",
+        "potencia_W": 20,
+        "conector": "USB-C",
+        "limites_admitidos_pct": [
+          80,
+          85,
+          90,
+          95,
+          100
+        ],
+        "limite_por_defecto_pct": 100
+      },
+      "senales": [
+        "CHARGER1.limit.command",
+        "CHARGER1.limit.command.feedback"
+      ],
+      "modelos": [
+        "MOD-003"
+      ],
+      "documentacion": [
+        "GDB-IDS-ACT"
+      ],
+      "geometria": {
+        "nodo_gltf": "CHARGER1",
+        "traslacion_m": [
+          0.0,
+          -0.15,
+          0.0
+        ],
+        "medidas": "aproximadas"
+      }
+    },
+    {
+      "id": "USER1",
+      "nombre": "Usuario",
+      "tipo": "entorno",
+      "padre": null,
+      "atributos": {
+        "descripcion": "Propietario del móvil. No forma parte del activo, pero su calendario y su rutina determinan el consumo.",
+        "rutina": "config/rutina.yaml"
+      },
+      "senales": [],
+      "modelos": [
+        "MOD-001"
+      ],
+      "documentacion": [
+        "GDB-CONOPS"
+      ]
+    },
+    {
+      "id": "CAL1",
+      "nombre": "Calendario del usuario",
+      "tipo": "sistema_externo",
+      "padre": "USER1",
+      "atributos": {
+        "naturaleza": "Simulado como módulo del simulador. En un despliegue real sería el calendario del usuario en la nube."
+      },
+      "senales": [
+        "USER1.CAL1.events.tomorrow",
+        "USER1.CAL1.event.command"
+      ],
+      "modelos": [
+        "MOD-001"
+      ],
+      "documentacion": [
+        "GDB-IDS-CAL"
+      ]
+    }
+  ],
+  "modelos": [
+    {
+      "id": "MOD-001",
+      "nombre": "Modelo de uso",
+      "elementos": [
+        "PHONE1",
+        "USER1",
+        "CAL1"
+      ],
+      "version": "pendiente (ficha de modelo)"
+    },
+    {
+      "id": "MOD-002",
+      "nombre": "Modelo de degradación",
+      "elementos": [
+        "BAT1"
+      ],
+      "version": "pendiente (ficha de modelo)"
+    },
+    {
+      "id": "MOD-003",
+      "nombre": "Modelo de decisión del límite de carga",
+      "elementos": [
+        "CHARGER1"
+      ],
+      "version": "pendiente (ficha de modelo)"
+    }
+  ],
+  "configuracion": {
+    "estado": "as-built",
+    "historial": [
+      {
+        "fecha": "2026-11-16",
+        "elemento": "BAT1",
+        "evento": "Alta de la configuración as-built",
+        "detalle": "Salud del 86 % según Ajustes → Batería y antigüedad aproximada de 790 días."
+      },
+      {
+        "fecha": "2026-11-26",
+        "elemento": "PHONE1, BAT1",
+        "evento": "Actualización de la configuración as-built",
+        "detalle": "Versión de iOS 27.2.1, 610 ciclos, batería fabricada en febrero de 2024 y en uso desde mayo de 2024. La antigüedad pasa a contarse desde la fabricación (unos 1005 días el 16/11/2026)."
+      }
+    ],
+    "deteccion_de_discrepancias": "Si la salud de BAT1 sube más de 1 punto (código de coherencia K = 80) y el historial no recoge una sustitución de la batería, el gemelo notifica una discrepancia al administrador. Si la sustitución está registrada, se acepta el nuevo valor y el modelo de degradación se reinicia con la nueva batería."
+  }
+}
