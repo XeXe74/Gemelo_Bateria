@@ -23,11 +23,16 @@ from .bateria import ParametrosDegradacion
 from .generar_uso import DatosUso
 from .rutina import PASO
 
-Politica = Callable[[ContextoDecision], int]
+Politica = Callable[[ContextoDecision], int | str]  # límite, o "optimizada" para la carga optimizada de iOS
 
 
 def politica_fija(tope: int) -> Politica:
     return lambda ctx: tope
+
+
+def politica_optimizada() -> Politica:
+    """Carga optimizada de iOS: 80 % durante la noche y 100 % poco antes de levantarse."""
+    return lambda ctx: "optimizada"
 
 
 def simular(datos: DatosUso, politica: Politica, seed_unidad: int = 1234,
@@ -37,7 +42,11 @@ def simular(datos: DatosUso, politica: Politica, seed_unidad: int = 1234,
     while not act.terminado:
         ctx = act.inicio_paso()
         if ctx is not None:
-            act.fijar_limite(int(politica(ctx)))
+            r = politica(ctx)
+            if r == "optimizada":
+                act.fijar_limite(100, optimizada=True)
+            else:
+                act.fijar_limite(int(r))
         act.fin_paso()
 
     pasos = pd.DataFrame(act.filas)

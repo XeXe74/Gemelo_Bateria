@@ -25,3 +25,6 @@ CONTEXTO.md
 
 # Copias de seguridad de los volúmenes (herramientas/gemelo.ps1)
 copias/
+
+# Descargas pendientes de revisar con el antivirus
+descargas_por_revisar/

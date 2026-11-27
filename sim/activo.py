@@ -26,6 +26,10 @@ from .bateria import BateriaSimulada, ParametrosDegradacion, velocidad_carga
 from .generar_uso import DIAS, TEMP_ACTIVIDAD, DatosUso
 from .rutina import PASO
 
+# Carga optimizada de iOS: mantiene el 80 % durante la noche y completa la carga en las últimas horas
+# antes de levantarse. El simulador conoce la hora real de levantarse, igual que iOS la aprende de la rutina.
+HORAS_FINAL_OPTIMIZADA = 2
+
 
 @dataclass
 class ContextoDecision:
@@ -79,6 +83,8 @@ class Activo:
                                    parametros or ParametrosDegradacion(), self.rng_unidad)
         self.nivel = float(cfg["simulacion"]["nivel_inicial"])
         self.tope = 100
+        self.optimizada = False  # carga optimizada de iOS en la carga nocturna
+        self.k_despertar: int | None = None
         self.motivo: str | None = None  # None, "noche", "emergencia", "previa", "coche", "clase"
         self.soh_rep = int(round(100 * self.bat.soh))
         self.temp = float(self.temp_base[0])
@@ -149,9 +155,17 @@ class Activo:
         self._resto_comportamiento()
         return None
 
-    def fijar_limite(self, tope: int, **extra) -> None:
-        """Aplica el límite de la carga nocturna y completa el comportamiento del paso."""
+    def fijar_limite(self, tope: int, optimizada: bool = False, **extra) -> None:
+        """Aplica el límite de la carga nocturna y completa el comportamiento del paso.
+        Con optimizada=True, el límite es el 100 % pero se mantiene el 80 % hasta poco antes de levantarse."""
         self.tope = int(tope)
+        self.optimizada = optimizada
+        if optimizada:
+            j = self.k
+            while j < self.n and self.actividad[j] == "dormir":
+                j += 1
+            self.k_despertar = j
+            extra = extra | {"optimizada": True}
         t = self.momentos[self.k]
         self.decisiones.append({"momento": t, "para_dia": (t + timedelta(hours=8)).date(),
                                 "nivel_al_enchufar": self.nivel, "tope": self.tope} | extra)
@@ -195,11 +209,15 @@ class Activo:
             # tope, el cargador alimenta el móvil y el nivel se queda en el tope.
             sub = dt_h / 3
             factor = self.factor_velocidad.get(motivo, 1.0)
+            tope = self.tope
+            if (self.optimizada and motivo == "noche" and self.k_despertar is not None
+                    and (self.k_despertar - k) * dt_h > HORAS_FINAL_OPTIMIZADA):
+                tope = min(tope, 80)
             for _ in range(3):
-                if nivel < self.tope:
-                    nivel = min(float(self.tope), nivel + velocidad_carga(nivel) * factor * sub - consumo / 3)
+                if nivel < tope:
+                    nivel = min(float(tope), nivel + velocidad_carga(nivel) * factor * sub - consumo / 3)
                     nivel = max(0.0, nivel)
-            temp += 6 if antes < 80 else (2 if nivel < self.tope else 1)
+            temp += 6 if antes < 80 else (2 if nivel < tope else 1)
         else:
             nivel = max(0.0, nivel - consumo)
 
