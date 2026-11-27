@@ -1,0 +1,192 @@
+# Despliegue del gemelo digital de la batería (GDB-DIS, DD-02). Levanta el sistema con un solo comando:
+#     docker compose -p gdb-produccion up -d --build
+# El entorno de desarrollo añade docker-compose.desarrollo.yml (DD-03). Las contraseñas llegan del
+# fichero .env, que no se versiona (ver .env.ejemplo).
+#
+# Orden de arranque (apartado 5.4 del diseño): buses e histórico -> conector y Telegraf ->
+# decisión -> simulador y panel. Cada contenedor espera a que sus dependencias estén preparadas.
+
+x-servicio-python: &servicio-python
+  restart: on-failure
+  healthcheck:
+    test: ["CMD", "python", "-c", "import os,sys,time; sys.exit(time.time()-os.path.getmtime('/tmp/vivo')>30)"]
+    interval: 5s
+    timeout: 3s
+    retries: 6
+    start_period: 30s
+
+x-bus: &bus
+  image: eclipse-mosquitto:2.0.21
+  command: ["sh", "/mosquitto/config/arranque.sh"]
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD", "nc", "-z", "127.0.0.1", "1883"]
+    interval: 30s
+    timeout: 3s
+    retries: 3
+    start_period: 20s
+    start_interval: 1s
+
+services:
+  # --- Red del activo ------------------------------------------------------------------
+  bus-activo:
+    <<: *bus
+    environment:
+      USUARIOS: "simulador:${CLAVE_ACTIVO_SIMULADOR} conector:${CLAVE_ACTIVO_CONECTOR}"
+    volumes:
+      - ./despliegue/bus-activo:/mosquitto/config:ro
+      - bus-activo-datos:/mosquitto/data
+    networks: [red-activo]
+
+  simulador:
+    <<: *servicio-python
+    build: {context: ., dockerfile: servicios/simulador/Dockerfile}
+    image: gdb/simulador:0.1
+    environment:
+      BUS_HOST: bus-activo
+      BUS_USUARIO: simulador
+      BUS_CLAVE: ${CLAVE_ACTIVO_SIMULADOR}
+      USO: /datos/uso/uso_s${SEMILLA_USO:-0}.xlsx
+      VELOCIDAD: ${VELOCIDAD:-2880}
+      PAUSA_INICIAL: ${PAUSA_INICIAL:-0}
+      SEED_UNIDAD: ${SEED_UNIDAD:-1234}
+    # El fichero de uso solo se monta en el simulador: ningún servicio del gemelo puede leerlo (REQ-0350).
+    volumes:
+      - ./data/uso:/datos/uso:ro
+      - simulador-estado:/estado
+    networks: [red-activo]
+    depends_on:
+      bus-activo: {condition: service_healthy}
+      conector: {condition: service_healthy}
+      decision: {condition: service_healthy}
+
+  # --- Punto de paso entre las dos redes -----------------------------------------------
+  conector:
+    <<: *servicio-python
+    build: {context: ., dockerfile: servicios/conector/Dockerfile}
+    image: gdb/conector:0.1
+    environment:
+      BUS_USUARIO: conector
+      BUS_CLAVE: ${CLAVE_GEMELO_CONECTOR}
+      ACTIVO_USUARIO: conector
+      ACTIVO_CLAVE: ${CLAVE_ACTIVO_CONECTOR}
+    volumes:
+      - conector-datos:/datos
+    networks: [red-activo, red-gemelo]
+    depends_on:
+      bus-activo: {condition: service_healthy}
+      mosquitto: {condition: service_healthy}
+      telegraf: {condition: service_started}
+
+  # --- Red del gemelo --------------------------------------------------------------------
+  mosquitto:
+    <<: *bus
+    environment:
+      USUARIOS: >-
+        conector:${CLAVE_GEMELO_CONECTOR} decision:${CLAVE_GEMELO_DECISION}
+        telegraf:${CLAVE_GEMELO_TELEGRAF} panel:${CLAVE_GEMELO_PANEL}
+    volumes:
+      - ./despliegue/bus-gemelo:/mosquitto/config:ro
+      - bus-gemelo-datos:/mosquitto/data
+    networks: [red-gemelo]
+
+  influxdb:
+    image: influxdb:2.7.11
+    restart: unless-stopped
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: administrador
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUX_CLAVE_ADMIN}
+      DOCKER_INFLUXDB_INIT_ORG: gemelo
+      DOCKER_INFLUXDB_INIT_BUCKET: gemelo
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUX_TOKEN}
+    volumes:
+      - influxdb-datos:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+      - ./despliegue/influxdb/cubos.sh:/docker-entrypoint-initdb.d/cubos.sh:ro
+    networks: [red-gemelo]
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  telegraf:
+    image: telegraf:1.33.1
+    restart: unless-stopped
+    # Grupo 0 para poder leer el socket de Docker (CPU y memoria de los contenedores).
+    user: "999:0"
+    environment:
+      INFLUX_TOKEN: ${INFLUX_TOKEN}
+      INFLUX_ORG: gemelo
+      BUS_USUARIO: telegraf
+      BUS_CLAVE: ${CLAVE_GEMELO_TELEGRAF}
+    volumes:
+      - ./despliegue/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks: [red-gemelo]
+    depends_on:
+      mosquitto: {condition: service_healthy}
+      influxdb: {condition: service_healthy}
+
+  decision:
+    <<: *servicio-python
+    build: {context: ., dockerfile: servicios/decision/Dockerfile}
+    image: gdb/decision:0.1
+    environment:
+      BUS_USUARIO: decision
+      BUS_CLAVE: ${CLAVE_GEMELO_DECISION}
+    networks: [red-gemelo]
+    depends_on:
+      mosquitto: {condition: service_healthy}
+      conector: {condition: service_healthy}
+
+  nodered:
+    build: {context: ., dockerfile: servicios/nodered/Dockerfile}
+    image: gdb/panel:0.1
+    restart: unless-stopped
+    command: ["--settings", "/usr/src/node-red/ajustes/settings.js"]
+    # El healthcheck de la imagen espera la configuración en /data; este comprueba que Node-RED responde.
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:1880/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+      start_interval: 2s
+    environment:
+      TZ: Europe/Madrid
+      # La imagen de Node-RED usa esta variable para el fichero de flujos (tiene prioridad sobre settings.js).
+      FLOWS: flujos/flows.json
+      BUS_USUARIO: panel
+      BUS_CLAVE: ${CLAVE_GEMELO_PANEL}
+      PANEL_CLAVE_ADMIN: ${PANEL_CLAVE_ADMIN}
+      PANEL_CLAVE_LECTOR: ${PANEL_CLAVE_LECTOR}
+      INFLUX_TOKEN: ${INFLUX_TOKEN}
+    volumes:
+      - nodered-datos:/data
+      - ./servicios/nodered/flujos:/data/flujos
+    # El panel solo se publica en la dirección local del ordenador (DD-05).
+    ports:
+      - "127.0.0.1:${PUERTO_PANEL:-1880}:1880"
+    networks: [red-gemelo]
+    depends_on:
+      mosquitto: {condition: service_healthy}
+      influxdb: {condition: service_healthy}
+      decision: {condition: service_healthy}
+
+# Dos redes separadas (DD-09): el conector es el único contenedor conectado a las dos. La red del
+# activo es interna, sin salida al exterior.
+networks:
+  red-activo:
+    internal: true
+  red-gemelo: {}
+
+volumes:
+  simulador-estado:
+  bus-activo-datos:
+  bus-gemelo-datos:
+  influxdb-datos:
+  influxdb-config:
+  conector-datos:
+  nodered-datos:

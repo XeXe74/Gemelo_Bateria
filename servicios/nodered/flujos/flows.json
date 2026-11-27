@@ -1,0 +1,1483 @@
+[
+    {
+        "id": "flujo-panel",
+        "type": "tab",
+        "label": "Panel del gemelo",
+        "disabled": false,
+        "info": "Panel del gemelo digital de la batería (PAN). Se genera con herramientas/panel_flujos.py."
+    },
+    {
+        "id": "bus-gemelo",
+        "type": "mqtt-broker",
+        "name": "Bus del gemelo",
+        "broker": "mosquitto",
+        "port": "1883",
+        "clientid": "panel",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "5",
+        "keepalive": "30",
+        "cleansession": false,
+        "autoUnsubscribe": true,
+        "birthTopic": "gemelo/sistema/estado/panel",
+        "birthQos": "1",
+        "birthRetain": "true",
+        "birthPayload": "{\"estado\":\"activo\"}",
+        "birthMsg": {},
+        "closeTopic": "gemelo/sistema/estado/panel",
+        "closeQos": "1",
+        "closeRetain": "true",
+        "closePayload": "{\"estado\":\"detenido\"}",
+        "closeMsg": {},
+        "willTopic": "gemelo/sistema/estado/panel",
+        "willQos": "1",
+        "willRetain": "true",
+        "willPayload": "{\"estado\":\"caido\"}",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": "86400"
+    },
+    {
+        "id": "base-panel",
+        "type": "ui-base",
+        "name": "Gemelo de la batería",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "showPageTitle": true,
+        "navigationStyle": "default",
+        "titleBarStyle": "default"
+    },
+    {
+        "id": "tema-panel",
+        "type": "ui-theme",
+        "name": "Paleta del proyecto",
+        "colors": {
+            "surface": "#1E3A5F",
+            "primary": "#2C7A7B",
+            "bgPage": "#F3F6FA",
+            "groupBg": "#ffffff",
+            "groupOutline": "#d5dde8"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "6px",
+            "widgetGap": "12px"
+        }
+    },
+    {
+        "id": "p-estado",
+        "type": "ui-page",
+        "name": "Estado",
+        "ui": "base-panel",
+        "path": "/estado",
+        "icon": "battery-charging",
+        "layout": "grid",
+        "theme": "tema-panel",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "p-operacion",
+        "type": "ui-page",
+        "name": "Operación",
+        "ui": "base-panel",
+        "path": "/operacion",
+        "icon": "tune",
+        "layout": "grid",
+        "theme": "tema-panel",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 2,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "p-admin",
+        "type": "ui-page",
+        "name": "Administración",
+        "ui": "base-panel",
+        "path": "/administracion",
+        "icon": "cog",
+        "layout": "grid",
+        "theme": "tema-panel",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 3,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "g-movil",
+        "type": "ui-group",
+        "name": "Móvil y cargador",
+        "page": "p-estado",
+        "width": "4",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "g-decision",
+        "type": "ui-group",
+        "name": "Decisión de esta noche",
+        "page": "p-estado",
+        "width": "8",
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "g-grafica",
+        "type": "ui-group",
+        "name": "Nivel de carga (últimos dos días simulados)",
+        "page": "p-estado",
+        "width": "12",
+        "height": "1",
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "g-simulacion",
+        "type": "ui-group",
+        "name": "Simulación",
+        "page": "p-operacion",
+        "width": "4",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "g-calendario",
+        "type": "ui-group",
+        "name": "Calendario de mañana",
+        "page": "p-operacion",
+        "width": "8",
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "g-evento",
+        "type": "ui-group",
+        "name": "Añadir un evento a mañana",
+        "page": "p-operacion",
+        "width": "6",
+        "height": "1",
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "g-servicios",
+        "type": "ui-group",
+        "name": "Servicios",
+        "page": "p-admin",
+        "width": "6",
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "g-avisos",
+        "type": "ui-group",
+        "name": "Avisos",
+        "page": "p-admin",
+        "width": "6",
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "g-registro",
+        "type": "ui-group",
+        "name": "Registro",
+        "page": "p-admin",
+        "width": "12",
+        "height": "1",
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "in-movil",
+        "type": "mqtt in",
+        "z": "flujo-panel",
+        "name": "gemelo/PHONE1/#",
+        "topic": "gemelo/PHONE1/#",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "bus-gemelo",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 110,
+        "wires": [
+            [
+                "f-senales"
+            ]
+        ]
+    },
+    {
+        "id": "in-cargador",
+        "type": "mqtt in",
+        "z": "flujo-panel",
+        "name": "gemelo/CHARGER1/limit/command/feedback",
+        "topic": "gemelo/CHARGER1/limit/command/feedback",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "bus-gemelo",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 160,
+        "wires": [
+            [
+                "f-senales"
+            ]
+        ]
+    },
+    {
+        "id": "f-senales",
+        "type": "function",
+        "z": "flujo-panel",
+        "name": "Señal -> valor",
+        "func": "\nfunction hora(ts) {\n    if (!ts) return \"—\";\n    return new Date(ts).toLocaleString(\"es-ES\", {timeZone: \"Europe/Madrid\", day: \"2-digit\", month: \"2-digit\",\n        year: \"numeric\", hour: \"2-digit\", minute: \"2-digit\"});\n}\n\n// Cada señal llega como {\"type\":\"tag\",\"body\":{t, v, q, k, ts}}. Si la calidad o la coherencia\n// no son correctas, se indica junto al valor.\nconst b = msg.payload && msg.payload.body;\nif (!b) return null;\nconst nota = b.q === 1 ? \" (sin comunicación)\" : (b.k === 10 ? \"\" : (b.k !== 0 ? \" (dato dudoso, K = \" + b.k + \")\" : \"\"));\nconst salidas = [null, null, null, null, null, null, null];\nconst v = b.v;\nswitch (b.t) {\n    case \"PHONE1.BAT1.level\":\n        if (v === null) return null;\n        salidas[0] = {payload: Math.round(v)};\n        salidas[6] = {payload: {x: new Date(b.ts).getTime(), y: v}, topic: \"Nivel\"};\n        flow.set(\"instante\", b.ts);\n        break;\n    case \"PHONE1.status.plugged\":\n        salidas[1] = {payload: (v === 1 ? \"Enchufado\" : v === 0 ? \"Desenchufado\" : \"—\") + nota}; break;\n    case \"PHONE1.status.sleep\":\n        salidas[2] = {payload: (v === 1 ? \"Activado\" : v === 0 ? \"Desactivado\" : \"—\") + nota}; break;\n    case \"PHONE1.BAT1.temperature\":\n        salidas[3] = {payload: (v === null ? \"—\" : v.toFixed(1).replace(\".\", \",\") + \" °C\") + nota}; break;\n    case \"PHONE1.BAT1.soh\":\n        salidas[4] = {payload: (v === null ? \"—\" : v + \" %\") + nota}; break;\n    case \"CHARGER1.limit.command.feedback\":\n        salidas[5] = {payload: (v === null ? \"—\" : v + \" %\") + nota}; break;\n    default:\n        return null;\n}\nreturn salidas;\n",
+        "outputs": 7,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 110,
+        "wires": [
+            [
+                "w-nivel"
+            ],
+            [
+                "w-enchufado"
+            ],
+            [
+                "w-dormir"
+            ],
+            [
+                "w-temp"
+            ],
+            [
+                "w-salud"
+            ],
+            [
+                "w-limite"
+            ],
+            [
+                "w-grafica"
+            ]
+        ]
+    },
+    {
+        "id": "w-nivel",
+        "type": "ui-gauge",
+        "z": "flujo-panel",
+        "name": "Nivel",
+        "group": "g-movil",
+        "order": 1,
+        "width": 4,
+        "height": 3,
+        "gtype": "gauge-half",
+        "gstyle": "rounded",
+        "title": "Nivel de carga",
+        "units": "",
+        "icon": "",
+        "prefix": "",
+        "suffix": "%",
+        "segments": [
+            {
+                "from": "0",
+                "color": "#E07A2F"
+            },
+            {
+                "from": "20",
+                "color": "#2C7A7B"
+            }
+        ],
+        "min": 0,
+        "max": "100",
+        "sizeThickness": 16,
+        "sizeGap": 4,
+        "sizeKeyThickness": 8,
+        "styleRounded": true,
+        "styleGlow": false,
+        "className": "",
+        "x": 700,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "w-enchufado",
+        "type": "ui-text",
+        "z": "flujo-panel",
+        "group": "g-movil",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "Cargador",
+        "label": "Cargador",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#1E3A5F",
+        "wrapText": false,
+        "className": "",
+        "x": 700,
+        "y": 110,
+        "wires": []
+    },
+    {
+        "id": "w-dormir",
+        "type": "ui-text",
+        "z": "flujo-panel",
+        "group": "g-movil",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "Modo Dormir",
+        "label": "Modo Dormir",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#1E3A5F",
+        "wrapText": false,
+        "className": "",
+        "x": 700,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "w-temp",
+        "type": "ui-text",
+        "z": "flujo-panel",
+        "group": "g-movil",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "Temperatura de la batería",
+        "label": "Temperatura de la batería",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#1E3A5F",
+        "wrapText": false,
+        "className": "",
+        "x": 700,
+        "y": 210,
+        "wires": []
+    },
+    {
+        "id": "w-salud",
+        "type": "ui-text",
+        "z": "flujo-panel",
+        "group": "g-movil",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "Salud (Ajustes)",
+        "label": "Salud (Ajustes)",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#1E3A5F",
+        "wrapText": false,
+        "className": "",
+        "x": 700,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "w-limite",
+        "type": "ui-text",
+        "z": "flujo-panel",
+        "group": "g-movil",
+        "order": 6,
+        "width": 0,
+        "height": 0,
+        "name": "Límite aplicado",
+        "label": "Límite aplicado",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#1E3A5F",
+        "wrapText": false,
+        "className": "",
+        "x": 700,
+        "y": 310,
+        "wires": []
+    },
+    {
+        "id": "w-grafica",
+        "type": "ui-chart",
+        "z": "flujo-panel",
+        "group": "g-grafica",
+        "name": "Nivel",
+        "label": "",
+        "order": 1,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "",
+        "xAxisProperty": "x",
+        "xAxisPropertyType": "property",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "%",
+        "yAxisProperty": "y",
+        "yAxisPropertyType": "property",
+        "ymin": "0",
+        "ymax": "100",
+        "bins": 10,
+        "action": "append",
+        "stackSeries": false,
+        "pointShape": "false",
+        "pointRadius": 0,
+        "showLegend": false,
+        "removeOlder": "52",
+        "removeOlderUnit": "604800",
+        "removeOlderPoints": "192",
+        "colors": [
+            "#2C7A7B",
+            "#E07A2F",
+            "#1E3A5F"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": 12,
+        "height": 5,
+        "className": "",
+        "interpolation": "linear",
+        "x": 700,
+        "y": 360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "in-rec",
+        "type": "mqtt in",
+        "z": "flujo-panel",
+        "name": "gemelo/GD/PHONE1/recommendation",
+        "topic": "gemelo/GD/PHONE1/recommendation",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "bus-gemelo",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 460,
+        "wires": [
+            [
+                "f-rec"
+            ]
+        ]
+    },
+    {
+        "id": "f-rec",
+        "type": "function",
+        "z": "flujo-panel",
+        "name": "Recomendación",
+        "func": "\nfunction hora(ts) {\n    if (!ts) return \"—\";\n    return new Date(ts).toLocaleString(\"es-ES\", {timeZone: \"Europe/Madrid\", day: \"2-digit\", month: \"2-digit\",\n        year: \"numeric\", hour: \"2-digit\", minute: \"2-digit\"});\n}\n\nconst b = msg.payload && msg.payload.body;\nif (!b || !b.v) return null;\nconst v = b.v;\nmsg.payload = {\n    titulo: v.tipo === \"decision\" ? \"Decisión tomada\" : \"Previsión (se confirma al enchufar)\",\n    dia: new Date(v.para_dia + \"T12:00:00Z\").toLocaleDateString(\"es-ES\", {weekday: \"long\", day: \"numeric\", month: \"long\"}),\n    limite: v.limite,\n    corte: hora(v.hora_corte_estimada),\n    consumo: Math.round(v.consumo_previsto),\n    nivel: Math.round(v.nivel_al_enchufar),\n    explicacion: v.explicacion,\n    modelo: v.modelo,\n    instante: hora(b.ts),\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 460,
+        "wires": [
+            [
+                "w-rec"
+            ]
+        ]
+    },
+    {
+        "id": "w-rec",
+        "type": "ui-template",
+        "z": "flujo-panel",
+        "group": "g-decision",
+        "page": "",
+        "ui": "",
+        "name": "Decisión",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "head": "",
+        "format": "<template>\n  <div v-if=\"msg && msg.payload\" style=\"color:#1E3A5F\">\n    <div style=\"color:#2C7A7B;font-weight:600\">{{ msg.payload.titulo }} · para el {{ msg.payload.dia }}</div>\n    <div style=\"font-size:44px;font-weight:700;margin:4px 0\">{{ msg.payload.limite }} %</div>\n    <div>Corte estimado de la carga: <b>{{ msg.payload.corte }}</b> (al enchufar con un {{ msg.payload.nivel }} %)</div>\n    <div>Consumo previsto de mañana: <b>{{ msg.payload.consumo }} %</b></div>\n    <p style=\"margin-top:10px\">{{ msg.payload.explicacion }}</p>\n    <div style=\"font-size:12px;color:#8A94A3\">Modelo: {{ msg.payload.modelo }} · instante simulado: {{ msg.payload.instante }}</div>\n  </div>\n  <div v-else>Todavía no hay ninguna previsión. Se publica a partir de las 18:00 del día simulado.</div>\n</template>",
+        "storeOutMessages": true,
+        "passthru": false,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 700,
+        "y": 460,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "in-latido-activo",
+        "type": "mqtt in",
+        "z": "flujo-panel",
+        "name": "gemelo/sistema/activo/latido",
+        "topic": "gemelo/sistema/activo/latido",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "bus-gemelo",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 560,
+        "wires": [
+            [
+                "f-latido"
+            ]
+        ]
+    },
+    {
+        "id": "f-latido",
+        "type": "function",
+        "z": "flujo-panel",
+        "name": "Reloj simulado",
+        "func": "\nfunction hora(ts) {\n    if (!ts) return \"—\";\n    return new Date(ts).toLocaleString(\"es-ES\", {timeZone: \"Europe/Madrid\", day: \"2-digit\", month: \"2-digit\",\n        year: \"numeric\", hour: \"2-digit\", minute: \"2-digit\"});\n}\n\nconst v = msg.payload || {};\nconst vel = v.velocidad >= 2880 ? \"un día cada 30 s\" : (\"x\" + v.velocidad);\nmsg.payload = hora(v.instante_simulado) + \" · \" + vel + (v.pausa ? \" · en pausa\" : \"\");\nflow.set(\"instante\", v.instante_simulado);\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 560,
+        "wires": [
+            [
+                "w-reloj"
+            ]
+        ]
+    },
+    {
+        "id": "w-reloj",
+        "type": "ui-text",
+        "z": "flujo-panel",
+        "group": "g-simulacion",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "Instante simulado",
+        "label": "Instante simulado",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "style": false,
+        "font": "",
+        "fontSize": 16,
+        "color": "#1E3A5F",
+        "wrapText": false,
+        "className": "",
+        "x": 700,
+        "y": 560,
+        "wires": []
+    },
+    {
+        "id": "w-velocidad",
+        "type": "ui-dropdown",
+        "z": "flujo-panel",
+        "group": "g-simulacion",
+        "name": "Velocidad",
+        "label": "Velocidad",
+        "tooltip": "",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "multiple": false,
+        "chips": false,
+        "clearable": false,
+        "options": [
+            {
+                "label": "Tiempo real (x1)",
+                "value": 1,
+                "type": "num"
+            },
+            {
+                "label": "1 hora por minuto (x60)",
+                "value": 60,
+                "type": "num"
+            },
+            {
+                "label": "1 día cada 4 min (x360)",
+                "value": 360,
+                "type": "num"
+            },
+            {
+                "label": "1 día por minuto (x1440)",
+                "value": 1440,
+                "type": "num"
+            },
+            {
+                "label": "1 día cada 30 s (x2880)",
+                "value": 2880,
+                "type": "num"
+            }
+        ],
+        "payload": "",
+        "topic": "velocidad",
+        "topicType": "str",
+        "className": "",
+        "typeIsComboBox": true,
+        "msgTrigger": "onChange",
+        "x": 180,
+        "y": 610,
+        "wires": [
+            [
+                "f-control"
+            ]
+        ]
+    },
+    {
+        "id": "w-pausa",
+        "type": "ui-button",
+        "z": "flujo-panel",
+        "group": "g-simulacion",
+        "name": "Pausar",
+        "label": "Pausar",
+        "order": 3,
+        "width": "2",
+        "height": "1",
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "pause",
+        "iconPosition": "left",
+        "payload": "true",
+        "payloadType": "bool",
+        "topic": "pausa",
+        "topicType": "str",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 180,
+        "y": 660,
+        "wires": [
+            [
+                "f-control"
+            ]
+        ]
+    },
+    {
+        "id": "w-seguir",
+        "type": "ui-button",
+        "z": "flujo-panel",
+        "group": "g-simulacion",
+        "name": "Reanudar",
+        "label": "Reanudar",
+        "order": 4,
+        "width": "2",
+        "height": "1",
+        "emulateClick": false,
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "play",
+        "iconPosition": "left",
+        "payload": "false",
+        "payloadType": "bool",
+        "topic": "pausa",
+        "topicType": "str",
+        "buttonColor": "",
+        "textColor": "",
+        "iconColor": "",
+        "enableClick": true,
+        "enablePointerdown": false,
+        "pointerdownPayload": "",
+        "pointerdownPayloadType": "str",
+        "enablePointerup": false,
+        "pointerupPayload": "",
+        "pointerupPayloadType": "str",
+        "x": 180,
+        "y": 710,
+        "wires": [
+            [
+                "f-control"
+            ]
+        ]
+    },
+    {
+        "id": "f-control",
+        "type": "function",
+        "z": "flujo-panel",
+        "name": "Control de la simulación",
+        "func": "\nconst n = (context.get(\"n\") || 0) + 1;\ncontext.set(\"n\", n);\nconst control = {id: \"SIM-PAN-\" + String(n).padStart(4, \"0\")};\ncontrol[msg.topic] = msg.payload;\nmsg.payload = JSON.stringify(control);\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 660,
+        "wires": [
+            [
+                "out-simulacion"
+            ]
+        ]
+    },
+    {
+        "id": "out-simulacion",
+        "type": "mqtt out",
+        "z": "flujo-panel",
+        "name": "gemelo/sistema/simulacion",
+        "topic": "gemelo/sistema/simulacion",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "bus-gemelo",
+        "x": 700,
+        "y": 660,
+        "wires": []
+    },
+    {
+        "id": "in-cal",
+        "type": "mqtt in",
+        "z": "flujo-panel",
+        "name": "gemelo/USER1/CAL1/events/tomorrow",
+        "topic": "gemelo/USER1/CAL1/events/tomorrow",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "bus-gemelo",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 810,
+        "wires": [
+            [
+                "f-cal"
+            ]
+        ]
+    },
+    {
+        "id": "f-cal",
+        "type": "function",
+        "z": "flujo-panel",
+        "name": "Calendario",
+        "func": "\nfunction hora(ts) {\n    if (!ts) return \"—\";\n    return new Date(ts).toLocaleString(\"es-ES\", {timeZone: \"Europe/Madrid\", day: \"2-digit\", month: \"2-digit\",\n        year: \"numeric\", hour: \"2-digit\", minute: \"2-digit\"});\n}\n\nconst b = msg.payload && msg.payload.body;\nif (!b) return null;\nflow.set(\"calendario_ts\", b.ts);\nconst eventos = Array.isArray(b.v) ? b.v : [];\nmsg.payload = {\n    nota: b.q === 1 ? \"Sin comunicación con el calendario: se muestra la última versión recibida.\" : \"\",\n    eventos: eventos.map(e => ({titulo: e.titulo, actividad: e.actividad, inicio: hora(e.inicio), fin: hora(e.fin)})),\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 810,
+        "wires": [
+            [
+                "w-cal"
+            ]
+        ]
+    },
+    {
+        "id": "w-cal",
+        "type": "ui-template",
+        "z": "flujo-panel",
+        "group": "g-calendario",
+        "page": "",
+        "ui": "",
+        "name": "Calendario",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "head": "",
+        "format": "<template>\n  <div v-if=\"msg && msg.payload\">\n    <div v-if=\"msg.payload.nota\" style=\"color:#E07A2F\">{{ msg.payload.nota }}</div>\n    <div v-if=\"msg.payload.eventos.length === 0\">No hay eventos en el calendario de mañana.</div>\n    <table v-else style=\"width:100%;border-collapse:collapse\">\n      <tr style=\"background:#1E3A5F;color:white\"><th style=\"text-align:left;padding:4px\">Evento</th>\n        <th style=\"text-align:left\">Actividad</th><th style=\"text-align:left\">Inicio</th><th style=\"text-align:left\">Fin</th></tr>\n      <tr v-for=\"(e, i) in msg.payload.eventos\" :key=\"i\" :style=\"{background: i % 2 ? '#F3F6FA' : 'white'}\">\n        <td style=\"padding:4px\">{{ e.titulo }}</td><td>{{ e.actividad }}</td><td>{{ e.inicio }}</td><td>{{ e.fin }}</td></tr>\n    </table>\n  </div>\n</template>",
+        "storeOutMessages": true,
+        "passthru": false,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 700,
+        "y": 810,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "w-actividad",
+        "type": "ui-dropdown",
+        "z": "flujo-panel",
+        "group": "g-evento",
+        "name": "Actividad",
+        "label": "Actividad",
+        "tooltip": "",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "multiple": false,
+        "chips": false,
+        "clearable": false,
+        "options": [
+            {
+                "label": "social",
+                "value": "social",
+                "type": "str"
+            },
+            {
+                "label": "cena",
+                "value": "cena",
+                "type": "str"
+            },
+            {
+                "label": "cine",
+                "value": "cine",
+                "type": "str"
+            },
+            {
+                "label": "noche_fuera",
+                "value": "noche_fuera",
+                "type": "str"
+            },
+            {
+                "label": "salida_corta",
+                "value": "salida_corta",
+                "type": "str"
+            },
+            {
+                "label": "dia_fuera",
+                "value": "dia_fuera",
+                "type": "str"
+            },
+            {
+                "label": "gimnasio",
+                "value": "gimnasio",
+                "type": "str"
+            },
+            {
+                "label": "clase",
+                "value": "clase",
+                "type": "str"
+            },
+            {
+                "label": "clase_datos",
+                "value": "clase_datos",
+                "type": "str"
+            },
+            {
+                "label": "carplay",
+                "value": "carplay",
+                "type": "str"
+            },
+            {
+                "label": "casa",
+                "value": "casa",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "actividad",
+        "topicType": "str",
+        "className": "",
+        "typeIsComboBox": true,
+        "msgTrigger": "onChange",
+        "x": 180,
+        "y": 910,
+        "wires": [
+            [
+                "f-actividad"
+            ]
+        ]
+    },
+    {
+        "id": "f-actividad",
+        "type": "function",
+        "z": "flujo-panel",
+        "name": "Guardar actividad",
+        "func": "flow.set(\"actividad\", msg.payload);\nreturn null;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 910,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "w-form",
+        "type": "ui-form",
+        "z": "flujo-panel",
+        "name": "Evento nuevo",
+        "group": "g-evento",
+        "label": "",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "options": [
+            {
+                "label": "Título",
+                "key": "titulo",
+                "type": "text",
+                "required": true,
+                "rows": null
+            },
+            {
+                "label": "Hora de inicio",
+                "key": "inicio",
+                "type": "time",
+                "required": true,
+                "rows": null
+            },
+            {
+                "label": "Duración (horas)",
+                "key": "duracion",
+                "type": "number",
+                "required": true,
+                "rows": null
+            }
+        ],
+        "formValue": {
+            "titulo": "",
+            "inicio": "",
+            "duracion": ""
+        },
+        "payload": "",
+        "submit": "Añadir",
+        "cancel": "Limpiar",
+        "resetOnSubmit": true,
+        "topic": "evento",
+        "topicType": "str",
+        "splitLayout": "",
+        "className": "",
+        "passthru": false,
+        "dropdownOptions": [],
+        "x": 180,
+        "y": 960,
+        "wires": [
+            [
+                "f-evento"
+            ]
+        ]
+    },
+    {
+        "id": "f-evento",
+        "type": "function",
+        "z": "flujo-panel",
+        "name": "Evento nuevo",
+        "func": "\n// Construye el evento del día siguiente en hora peninsular y lo publica como señal de escritura\n// USER1.CAL1.event.command (GDB-IDS-CAL, tabla 6). Las horas antes de las 7:00 son de la madrugada posterior.\nconst ts = flow.get(\"calendario_ts\");\nconst actividad = flow.get(\"actividad\");\nconst f = msg.payload || {};\nif (!ts || !actividad || !f.inicio || !(Number(f.duracion) > 0)) {\n    node.warn(\"Faltan datos del evento o todavía no hay calendario\");\n    return [null, {payload: \"Elige la actividad y rellena todos los campos.\"}];\n}\nconst madrid = (d) => new Date(d.toLocaleString(\"en-US\", {timeZone: \"Europe/Madrid\"}));\n// Día siguiente según el instante del calendario: antes de las 7:00, el propio día.\nconst t = madrid(new Date(ts));\nconst dia = new Date(Date.UTC(t.getFullYear(), t.getMonth(), t.getDate() + (t.getHours() < 7 ? 0 : 1)));\nconst [h, m] = f.inicio.split(\":\").map(Number);\n// Instante UTC cuya hora en Madrid es la indicada: se corrige con la diferencia horaria de ese día.\nlet inicio = new Date(Date.UTC(dia.getUTCFullYear(), dia.getUTCMonth(), dia.getUTCDate() + (h < 7 ? 1 : 0), h, m));\nconst desfase = madrid(inicio).getTime() - new Date(inicio.toLocaleString(\"en-US\", {timeZone: \"UTC\"})).getTime();\ninicio = new Date(inicio.getTime() - desfase);\nconst fin = new Date(inicio.getTime() + Number(f.duracion) * 3600 * 1000);\nconst n = (context.get(\"n\") || 0) + 1;\ncontext.set(\"n\", n);\nconst v = {id: \"EVT-PAN-\" + String(n).padStart(4, \"0\"), inicio: inicio.toISOString(), fin: fin.toISOString(),\n           titulo: f.titulo, actividad: actividad};\nmsg.payload = JSON.stringify({type: \"tag\", body: {t: \"USER1.CAL1.event.command\", v: v, q: 0, k: 0,\n                                                   ts: flow.get(\"instante\") || ts}});\nreturn [msg, {payload: \"Evento «\" + f.titulo + \"» enviado al calendario.\"}];\n",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 960,
+        "wires": [
+            [
+                "out-evento"
+            ],
+            [
+                "w-aviso-evento"
+            ]
+        ]
+    },
+    {
+        "id": "out-evento",
+        "type": "mqtt out",
+        "z": "flujo-panel",
+        "name": "gemelo/USER1/CAL1/event/command",
+        "topic": "gemelo/USER1/CAL1/event/command",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "bus-gemelo",
+        "x": 700,
+        "y": 960,
+        "wires": []
+    },
+    {
+        "id": "w-aviso-evento",
+        "type": "ui-notification",
+        "z": "flujo-panel",
+        "ui": "base-panel",
+        "position": "top right",
+        "colorDefault": false,
+        "color": "#2C7A7B",
+        "displayTime": "4",
+        "showCountdown": true,
+        "outputs": 0,
+        "allowDismiss": true,
+        "dismissText": "Cerrar",
+        "allowConfirm": false,
+        "confirmText": "",
+        "raw": false,
+        "className": "",
+        "name": "Aviso del evento",
+        "x": 700,
+        "y": 1010,
+        "wires": []
+    },
+    {
+        "id": "in-estados",
+        "type": "mqtt in",
+        "z": "flujo-panel",
+        "name": "gemelo/sistema/estado/+",
+        "topic": "gemelo/sistema/estado/+",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "bus-gemelo",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 1110,
+        "wires": [
+            [
+                "f-servicios"
+            ]
+        ]
+    },
+    {
+        "id": "in-latidos",
+        "type": "mqtt in",
+        "z": "flujo-panel",
+        "name": "gemelo/sistema/latido/+",
+        "topic": "gemelo/sistema/latido/+",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "bus-gemelo",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 1160,
+        "wires": [
+            [
+                "f-servicios"
+            ]
+        ]
+    },
+    {
+        "id": "in-activo",
+        "type": "mqtt in",
+        "z": "flujo-panel",
+        "name": "gemelo/sistema/activo",
+        "topic": "gemelo/sistema/activo",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "bus-gemelo",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 1210,
+        "wires": [
+            [
+                "f-servicios"
+            ]
+        ]
+    },
+    {
+        "id": "i-cada5s",
+        "type": "inject",
+        "z": "flujo-panel",
+        "name": "cada 5 s",
+        "props": [],
+        "repeat": "5",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "2",
+        "topic": "",
+        "x": 180,
+        "y": 1260,
+        "wires": [
+            [
+                "f-servicios"
+            ]
+        ]
+    },
+    {
+        "id": "f-servicios",
+        "type": "function",
+        "z": "flujo-panel",
+        "name": "Estado de los servicios",
+        "func": "\nfunction hora(ts) {\n    if (!ts) return \"—\";\n    return new Date(ts).toLocaleString(\"es-ES\", {timeZone: \"Europe/Madrid\", day: \"2-digit\", month: \"2-digit\",\n        year: \"numeric\", hour: \"2-digit\", minute: \"2-digit\"});\n}\n\n// Estado de cada servicio a partir de su estado retenido y de su latido. Se considera caído si\n// publica su último aviso o si no llega su latido durante 30 s (REQ-0210).\nconst s = flow.get(\"servicios\") || {};\nif (msg.topic && msg.topic.startsWith(\"gemelo/sistema/\")) {\n    const partes = msg.topic.split(\"/\");\n    const nombre = partes[3];\n    if (nombre && (partes[2] === \"estado\" || partes[2] === \"latido\")) {\n        s[nombre] = s[nombre] || {};\n        if (partes[2] === \"estado\") s[nombre].estado = (msg.payload || {}).estado;\n        if (partes[2] === \"latido\") s[nombre].latido = Date.now();\n    }\n    if (partes[2] === \"activo\" && partes.length === 3) {\n        s[\"activo simulado\"] = {estado: (msg.payload || {}).estado, latido: Date.now(), sinLatido: true};\n    }\n    flow.set(\"servicios\", s);\n}\nconst filas = Object.keys(s).sort().map(n => {\n    const x = s[n];\n    let estado = x.estado || \"—\";\n    if (estado === \"activo\" && !x.sinLatido && (!x.latido || Date.now() - x.latido > 30000)) estado = \"caido (sin latido)\";\n    return {nombre: n, estado: estado, latido: x.latido ? new Date(x.latido).toLocaleTimeString(\"es-ES\") : \"—\"};\n});\nreturn {payload: filas};\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 1160,
+        "wires": [
+            [
+                "w-servicios"
+            ]
+        ]
+    },
+    {
+        "id": "w-servicios",
+        "type": "ui-template",
+        "z": "flujo-panel",
+        "group": "g-servicios",
+        "page": "",
+        "ui": "",
+        "name": "Servicios",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "head": "",
+        "format": "<template>\n  <table v-if=\"msg && msg.payload\" style=\"width:100%;border-collapse:collapse\">\n    <tr style=\"background:#1E3A5F;color:white\"><th style=\"text-align:left;padding:4px\">Servicio</th>\n      <th style=\"text-align:left\">Estado</th><th style=\"text-align:left\">Último latido</th></tr>\n    <tr v-for=\"(s, i) in msg.payload\" :key=\"s.nombre\" :style=\"{background: i % 2 ? '#F3F6FA' : 'white'}\">\n      <td style=\"padding:4px\">{{ s.nombre }}</td>\n      <td :style=\"{color: s.estado === 'activo' ? '#2C7A7B' : '#E07A2F', fontWeight: 600}\">{{ s.estado }}</td>\n      <td>{{ s.latido }}</td></tr>\n  </table>\n</template>",
+        "storeOutMessages": true,
+        "passthru": false,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 700,
+        "y": 1160,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "in-registro",
+        "type": "mqtt in",
+        "z": "flujo-panel",
+        "name": "gemelo/sistema/registro",
+        "topic": "gemelo/sistema/registro",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "bus-gemelo",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 1360,
+        "wires": [
+            [
+                "f-listas"
+            ]
+        ]
+    },
+    {
+        "id": "in-avisos",
+        "type": "mqtt in",
+        "z": "flujo-panel",
+        "name": "gemelo/notificaciones/entrada",
+        "topic": "gemelo/notificaciones/entrada",
+        "qos": "1",
+        "datatype": "json",
+        "broker": "bus-gemelo",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 180,
+        "y": 1410,
+        "wires": [
+            [
+                "f-listas"
+            ]
+        ]
+    },
+    {
+        "id": "f-listas",
+        "type": "function",
+        "z": "flujo-panel",
+        "name": "Registro y avisos",
+        "func": "\nfunction hora(ts) {\n    if (!ts) return \"—\";\n    return new Date(ts).toLocaleString(\"es-ES\", {timeZone: \"Europe/Madrid\", day: \"2-digit\", month: \"2-digit\",\n        year: \"numeric\", hour: \"2-digit\", minute: \"2-digit\"});\n}\n\n// Guarda las últimas 15 entradas para mostrarlas en orden inverso.\nconst clave = msg.topic === \"gemelo/sistema/registro\" ? \"registro\" : \"avisos\";\nconst lista = flow.get(clave) || [];\nconst m = msg.payload || {};\nlista.unshift({instante: hora(m.instante), origen: m.servicio || m.origen, nivel: m.gravedad || m.nivel,\n               destino: m.destino || \"\", mensaje: m.mensaje});\nflow.set(clave, lista.slice(0, 15));\nreturn clave === \"registro\" ? [{payload: lista.slice(0, 15)}, null] : [null, {payload: lista.slice(0, 15)}];\n",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 1360,
+        "wires": [
+            [
+                "w-registro"
+            ],
+            [
+                "w-avisos"
+            ]
+        ]
+    },
+    {
+        "id": "w-registro",
+        "type": "ui-template",
+        "z": "flujo-panel",
+        "group": "g-registro",
+        "page": "",
+        "ui": "",
+        "name": "Registro",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "head": "",
+        "format": "<template>\n  <div v-if=\"!msg || !msg.payload || msg.payload.length === 0\">Sin entradas.</div>\n  <table v-else style=\"width:100%;border-collapse:collapse;font-size:13px\">\n    <tr style=\"background:#1E3A5F;color:white\"><th style=\"text-align:left;padding:4px\">Instante (real)</th>\n      <th style=\"text-align:left\">Origen</th><th style=\"text-align:left\">Nivel</th><th style=\"text-align:left\">Mensaje</th></tr>\n    <tr v-for=\"(e, i) in msg.payload\" :key=\"i\" :style=\"{background: i % 2 ? '#F3F6FA' : 'white'}\">\n      <td style=\"padding:4px;white-space:nowrap\">{{ e.instante }}</td><td style=\"padding:0 8px\">{{ e.origen }}</td>\n      <td style=\"padding:0 8px\" :style=\"{color: ['error', 'alarma', 'aviso'].includes(e.nivel) ? '#E07A2F' : '#1E3A5F'}\">{{ e.nivel }}</td>\n      <td>{{ e.mensaje }}<span v-if=\"e.destino\" style=\"color:#8A94A3\"> (para: {{ e.destino }})</span></td></tr>\n  </table>\n</template>",
+        "storeOutMessages": true,
+        "passthru": false,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 700,
+        "y": 1360,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "w-avisos",
+        "type": "ui-template",
+        "z": "flujo-panel",
+        "group": "g-avisos",
+        "page": "",
+        "ui": "",
+        "name": "Avisos",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "head": "",
+        "format": "<template>\n  <div v-if=\"!msg || !msg.payload || msg.payload.length === 0\">Sin entradas.</div>\n  <table v-else style=\"width:100%;border-collapse:collapse;font-size:13px\">\n    <tr style=\"background:#1E3A5F;color:white\"><th style=\"text-align:left;padding:4px\">Instante (real)</th>\n      <th style=\"text-align:left\">Origen</th><th style=\"text-align:left\">Nivel</th><th style=\"text-align:left\">Mensaje</th></tr>\n    <tr v-for=\"(e, i) in msg.payload\" :key=\"i\" :style=\"{background: i % 2 ? '#F3F6FA' : 'white'}\">\n      <td style=\"padding:4px;white-space:nowrap\">{{ e.instante }}</td><td style=\"padding:0 8px\">{{ e.origen }}</td>\n      <td style=\"padding:0 8px\" :style=\"{color: ['error', 'alarma', 'aviso'].includes(e.nivel) ? '#E07A2F' : '#1E3A5F'}\">{{ e.nivel }}</td>\n      <td>{{ e.mensaje }}<span v-if=\"e.destino\" style=\"color:#8A94A3\"> (para: {{ e.destino }})</span></td></tr>\n  </table>\n</template>",
+        "storeOutMessages": true,
+        "passthru": false,
+        "resendOnRefresh": true,
+        "templateScope": "local",
+        "className": "",
+        "x": 700,
+        "y": 1410,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "i-latido",
+        "type": "inject",
+        "z": "flujo-panel",
+        "name": "cada 10 s",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "10",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "1",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 1560,
+        "wires": [
+            [
+                "f-latido-panel"
+            ]
+        ]
+    },
+    {
+        "id": "f-latido-panel",
+        "type": "function",
+        "z": "flujo-panel",
+        "name": "Latido del panel",
+        "func": "msg.payload = JSON.stringify({instante_real: new Date().toISOString()});\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 440,
+        "y": 1560,
+        "wires": [
+            [
+                "out-latido"
+            ]
+        ]
+    },
+    {
+        "id": "out-latido",
+        "type": "mqtt out",
+        "z": "flujo-panel",
+        "name": "gemelo/sistema/latido/panel",
+        "topic": "gemelo/sistema/latido/panel",
+        "qos": "1",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "bus-gemelo",
+        "x": 700,
+        "y": 1560,
+        "wires": []
+    }
+]

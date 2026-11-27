@@ -1,0 +1,8 @@
+# Los scripts y la configuración que se ejecutan dentro de los contenedores (Linux) van con LF.
+*.sh text eol=lf
+*.conf text eol=lf
+despliegue/**/acl text eol=lf
+*.yml text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.py text eol=lf

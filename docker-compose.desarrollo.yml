@@ -1,0 +1,16 @@
+# Entorno de desarrollo (GDB-DIS, DD-03). Se combina con docker-compose.yml:
+#     docker compose -p gdb-desarrollo -f docker-compose.yml -f docker-compose.desarrollo.yml up -d --build
+# Publica los dos buses y el histórico en la dirección local del ordenador para depurar (tabla 2 del
+# diseño). Al ser otro proyecto de Compose, tiene sus propios volúmenes y no comparte datos con producción.
+services:
+  bus-activo:
+    ports: ["127.0.0.1:1884:1883"]
+  mosquitto:
+    ports: ["127.0.0.1:1883:1883"]
+  influxdb:
+    ports: ["127.0.0.1:8086:8086"]
+
+# Para publicar el puerto del bus del activo, su red no puede ser interna en desarrollo.
+networks:
+  red-activo:
+    internal: false

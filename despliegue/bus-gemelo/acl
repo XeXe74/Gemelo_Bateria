@@ -1,0 +1,43 @@
+# Lista de control de acceso del bus del gemelo (GDB-DIS, DD-04 y tabla 6).
+# El identificador de cliente de cada servicio coincide con su usuario.
+
+# Todos los servicios publican su estado, su latido, el registro y los avisos,
+# y reciben la orden de parada.
+pattern write gemelo/sistema/estado/%u
+pattern write gemelo/sistema/latido/%u
+pattern write gemelo/sistema/registro
+pattern write gemelo/notificaciones/entrada
+pattern read gemelo/sistema/parada
+
+# Conector: único que publica las señales del activo y del calendario.
+user conector
+topic write gemelo/bruto/#
+topic write gemelo/PHONE1/#
+topic write gemelo/CHARGER1/limit/command/feedback
+topic write gemelo/USER1/CAL1/events/tomorrow
+topic write gemelo/sistema/activo
+topic write gemelo/sistema/activo/latido
+topic read gemelo/CHARGER1/limit/command
+topic read gemelo/USER1/CAL1/event/command
+topic read gemelo/sistema/simulacion
+
+# Servicio de decisión: único que publica la orden de límite de carga.
+user decision
+topic read gemelo/PHONE1/#
+topic read gemelo/USER1/CAL1/events/tomorrow
+topic read gemelo/CHARGER1/limit/command/feedback
+topic read gemelo/GD/USER1/risk
+topic write gemelo/CHARGER1/limit/command
+topic write gemelo/GD/PHONE1/recommendation
+
+# Histórico: lee todo para guardarlo.
+user telegraf
+topic read gemelo/#
+
+# Panel: lee todo y solo escribe los eventos nuevos, el riesgo aceptado y el control del sistema.
+user panel
+topic read gemelo/#
+topic write gemelo/USER1/CAL1/event/command
+topic write gemelo/GD/USER1/risk
+topic write gemelo/sistema/simulacion
+topic write gemelo/sistema/parada

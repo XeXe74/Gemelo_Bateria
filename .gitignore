@@ -19,3 +19,9 @@ referencias/estilo/
 CLAUDE.md
 CONTEXTO.md
 
+
+# Contraseñas del despliegue
+.env
+
+# Copias de seguridad de los volúmenes (herramientas/gemelo.ps1)
+copias/

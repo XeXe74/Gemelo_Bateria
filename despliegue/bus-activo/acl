@@ -1,0 +1,23 @@
+# Lista de control de acceso del bus del activo (GDB-IDS-ACT, apartados 4.1 y 5.2).
+
+# El simulador publica los datos del activo y atiende las escrituras de la lista blanca.
+user simulador
+topic write activo/PHONE1/medidas
+topic write activo/CHARGER1/confirmacion
+topic write activo/USER1/calendario
+topic write activo/PHONE1/historico/respuesta
+topic write activo/sistema/estado
+topic write activo/sistema/latido
+topic read activo/CHARGER1/orden
+topic read activo/USER1/calendario/nuevo
+topic read activo/PHONE1/historico/solicitud
+topic read activo/sistema/simulacion
+
+# El conector lee todo y solo escribe en la lista blanca (y en su propio estado).
+user conector
+topic read activo/#
+topic write activo/CHARGER1/orden
+topic write activo/USER1/calendario/nuevo
+topic write activo/PHONE1/historico/solicitud
+topic write activo/sistema/simulacion
+topic write activo/sistema/estado/conector

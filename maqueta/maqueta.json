@@ -1,7 +1,7 @@
 {
   "id": "GDB-MAQ",
-  "version": "1.1",
-  "fecha": "2026-11-26",
+  "version": "1.2",
+  "fecha": "2026-11-27",
   "descripcion": "Maqueta digital del gemelo de la batería de un smartphone: estructura jerárquica del activo y de su entorno, con atributos, señales, modelos, documentación y configuración.",
   "modelo_3d": "modelo_3d.glb",
   "unidades_3d": "metros",
@@ -56,7 +56,8 @@
         "en_uso_desde": "mayo de 2024"
       },
       "senales": [
-        "PHONE1.status.plugged"
+        "PHONE1.status.plugged",
+        "PHONE1.status.sleep"
       ],
       "modelos": [
         "MOD-001"
