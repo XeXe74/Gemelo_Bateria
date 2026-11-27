@@ -80,7 +80,8 @@ class ServicioSimulador:
         ruta = Path(os.environ.get("USO", "/datos/uso/uso_s0.xlsx"))
         seed = int(os.environ.get("SEED_UNIDAD", "1234"))
         self.ruta_guardado = Path(os.environ.get("GUARDADO", "/estado/simulador.pkl"))
-        self.clave = f"{ruta.name}|{seed}|{os.environ.get('DIAS', '')}"
+        # La versión de la batería invalida los puntos de guardado hechos con leyes de envejecimiento anteriores.
+        self.clave = f"{ruta.name}|{seed}|{os.environ.get('DIAS', '')}|bateria-mod002-v1.1"
         self.velocidad = float(os.environ.get("VELOCIDAD", str(VELOCIDAD_MAX)))
         self.pausa = os.environ.get("PAUSA_INICIAL", "0") == "1"
         if not self._cargar():
@@ -125,7 +126,7 @@ class ServicioSimulador:
             logging.warning("No se pudo leer el punto de guardado (%r): empieza el año", e)
             return False
         if g.get("clave") != self.clave:
-            logging.info("El punto de guardado es de otro año de uso: empieza el año")
+            logging.info("El punto de guardado es de otro año de uso o de otra versión de la batería: empieza el año")
             return False
         self.activo, self.secuencia, self.historico = g["activo"], g["secuencia"], g["historico"]
         self.version_cal, self.ordenes_aplicadas = g["version_cal"], g["ordenes_aplicadas"]

@@ -67,5 +67,10 @@
   0.0007283454747983092
  ],
  "escala_ciclado": 0.4966095211256904,
- "version": "MOD-002 v1.0"
+ "version": "MOD-002 v1.0",
+ "historia_inicial": {
+  "perdida_cal": 0.055678471899836005,
+  "perdida_cic": 0.10445326837495199,
+  "dias": 1005
+ }
 }

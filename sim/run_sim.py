@@ -58,7 +58,7 @@ def main() -> None:
     print(f"Incidentes (bajar del 5 % fuera de casa): {int(dias['incidente'].sum())}")
     print(f"Salud real: {dias['soh_real'].iloc[0]:.2f} % -> {dias['soh_real'].iloc[-1]:.2f} %")
     oc = res["ocultos"]
-    print(f"Pérdida por calendario {100 * oc['perdida_cal']:.2f} pts · por ciclado "
+    print(f"Pérdida acumulada desde la fabricación: por calendario {100 * oc['perdida_cal']:.2f} pts · por ciclado "
           f"{100 * oc['perdida_cyc']:.2f} pts · ciclos equivalentes {oc['ciclos_eq']:.0f}")
 
 

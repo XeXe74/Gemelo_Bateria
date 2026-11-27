@@ -1,82 +1,72 @@
 """Batería simulada: la «realidad» que el gemelo tiene que descubrir.
 
-Modelo semiempírico de pérdida de salud (SoH):
-  - Calendario: depende del tiempo, de la temperatura (Arrhenius) y, sobre todo, del
-    nivel de carga al que se mantiene la celda. Ley de raíz del tiempo:
-        dQ_cal = k_cal · f(T) · g(SoC) · dt / (2·√edad)
-  - Ciclado: proporcional a los ciclos equivalentes, con un recargo para la energía
-    cargada por encima del 80 %:
-        dQ_cyc = k_cyc · (ciclos_eq + β · carga_por_encima_80)
-
-Los parámetros NOMINALES son provisionales: se sustituirán por los ajustados con los
-datasets WMG (calendario) y Sandia (ciclado). Los parámetros REALES de esta unidad
-(k_cal_real, k_cyc_real) se sortean alrededor de los nominales y quedan ocultos: el
-gemelo no los ve y tiene que estimarlos a partir del SoH observado.
+Usa las leyes de envejecimiento calibradas en el paso de modelos (ficha MOD-002 v1.1), congeladas en
+sim/parametros_bateria.json para que la realidad no cambie si después se recalibra el modelo del gemelo:
+    - Calendario: pérdida = v(T, nivel) · t^z, con la tabla de velocidades ajustada con los ensayos de WMG y el
+      método del tiempo equivalente cuando las condiciones cambian.
+    - Ciclado: cada variación del nivel desgasta según la zona de carga en la que ocurre (forma de los ensayos de
+      Sandia y magnitud de la vida declarada por Apple para el iPhone 15).
+La unidad simulada tiene dos factores ocultos, uno de calendario y otro de ciclado, sorteados alrededor de 1 con
+la semilla de la unidad: el gemelo no los ve y tiene que estimarlos a partir de la salud que muestra Ajustes.
+La historia hasta el 16/11/2026 (14 puntos de pérdida, salud del 86 %) se reparte entre calendario y ciclado
+en la misma proporción que en la validación del modelo con la batería real.
 """
 from __future__ import annotations
 
-import math
-from dataclasses import dataclass, asdict
+import json
+from pathlib import Path
 
 import numpy as np
 
-R = 8.314  # J/(mol·K)
-
-
-@dataclass
-class ParametrosDegradacion:
-    k_cal: float = 2.0e-3      # pérdida de SoH (fracción) por √día a 25 °C y 50 % de carga
-    ea: float = 50_000.0       # energía de activación (J/mol)
-    t_ref_c: float = 25.0
-    alpha_soc: float = 2.0     # g(SoC) = exp(alpha · (SoC − 0,5))
-    k_cyc: float = 1.4e-4      # pérdida de SoH por ciclo equivalente completo
-    beta_alto: float = 2.0     # recargo por cada fracción cargada por encima del 80 %
+PARAMETROS = Path(__file__).with_name("parametros_bateria.json")
 
 
 class BateriaSimulada:
-    def __init__(self, soh_inicial: float, edad_dias: float,
-                 nominal: ParametrosDegradacion, rng_unidad: np.random.Generator,
-                 dispersion_unidad: float = 0.2):
-        self.nominal = nominal
-        # Parámetros ocultos de esta batería concreta.
-        self.k_cal_real = nominal.k_cal * float(np.exp(rng_unidad.normal(0, dispersion_unidad)))
-        self.k_cyc_real = nominal.k_cyc * float(np.exp(rng_unidad.normal(0, dispersion_unidad)))
+    def __init__(self, soh_inicial: float, edad_dias: float, rng_unidad: np.random.Generator,
+                 parametros: dict | None = None, dispersion_unidad: float = 0.2):
+        p = json.loads(PARAMETROS.read_text(encoding="utf-8")) | (parametros or {})
+        self.temps, self.niveles = p["temps"], p["niveles"]
+        self.log_v, self.z = np.asarray(p["log_v"]), p["z"]
+        self.zonas, self.pesos = p["zonas"], p["pesos"]
+        self.escala_ciclado = p["escala_ciclado"] * p.get("factor_ciclado", 1.0)  # factor para la sensibilidad
+        # Parámetros ocultos de esta batería concreta
+        self.f_cal = float(np.exp(rng_unidad.normal(0, dispersion_unidad)))
+        self.f_cic = float(np.exp(rng_unidad.normal(0, dispersion_unidad)))
+        # Historia hasta el inicio: la pérdida real repartida como en el modelo
+        h = p["historia_inicial"]
+        perdida0 = 1.0 - soh_inicial
+        parte_cal = h["perdida_cal"] / (h["perdida_cal"] + h["perdida_cic"])
+        self.perdida_cal = perdida0 * parte_cal
+        self.perdida_cyc = perdida0 * (1 - parte_cal)
         self.soh = soh_inicial
         self.edad_dias = edad_dias
         self.ciclos_eq = 0.0
-        self.perdida_cal = 0.0
-        self.perdida_cyc = 0.0
 
-    def _f_temp(self, temp_c: float) -> float:
-        t, tr = temp_c + 273.15, self.nominal.t_ref_c + 273.15
-        return math.exp(-self.nominal.ea / R * (1 / t - 1 / tr))
+    def _v(self, temp_c: float, nivel_pct: float) -> float:
+        filas = [np.interp(nivel_pct, self.niveles, fila) for fila in self.log_v]
+        inv = [1 / (t + 273.15) for t in self.temps]
+        t = min(max(temp_c, self.temps[0]), self.temps[-1])
+        return self.f_cal * float(np.exp(np.interp(1 / (t + 273.15), inv[::-1], filas[::-1])))
 
-    def _g_soc(self, soc: float) -> float:
-        return math.exp(self.nominal.alpha_soc * (soc - 0.5))
+    def _integral_pesos(self, a: float, b: float) -> float:
+        lo, hi = sorted((min(max(a, 0.0), 1.0), min(max(b, 0.0), 1.0)))
+        return sum(w * max(0.0, min(hi, z1) - max(lo, z0))
+                   for (z0, z1), w in zip(zip(self.zonas[:-1], self.zonas[1:]), self.pesos))
 
     def paso(self, nivel_antes: float, nivel_despues: float, temp_c: float, dt_h: float) -> None:
-        """Aplica la degradación de un paso. Los niveles van en % (0–100)."""
-        dt_d = dt_h / 24
-        soc = (nivel_antes + nivel_despues) / 200
-        dq_cal = (self.k_cal_real * self._f_temp(temp_c) * self._g_soc(soc)
-                  * dt_d / (2 * math.sqrt(self.edad_dias)))
-
-        cargado = max(0.0, nivel_despues - nivel_antes) / 100
-        descargado = max(0.0, nivel_antes - nivel_despues) / 100
-        ciclos = (cargado + descargado) / 2
-        lo, hi = sorted((nivel_antes, nivel_despues))
-        alto = max(0.0, hi - max(lo, 80.0)) / 100 if nivel_despues > nivel_antes else 0.0
-        dq_cyc = self.k_cyc_real * (ciclos + self.nominal.beta_alto * alto)
-
-        self.soh -= dq_cal + dq_cyc
+        """Aplica la degradación de un paso. Los niveles van en % (0-100)."""
+        v = self._v(temp_c, (nivel_antes + nivel_despues) / 2)
+        t_eq = (self.perdida_cal / v) ** (1 / self.z) if self.perdida_cal > 0 else 0.0
+        dq_cal = v * (t_eq + dt_h / 24) ** self.z - self.perdida_cal
+        dq_cyc = self.f_cic * self.escala_ciclado / 2 * self._integral_pesos(nivel_antes / 100, nivel_despues / 100)
         self.perdida_cal += dq_cal
         self.perdida_cyc += dq_cyc
-        self.ciclos_eq += ciclos
-        self.edad_dias += dt_d
+        self.soh -= dq_cal + dq_cyc
+        self.ciclos_eq += abs(nivel_despues - nivel_antes) / 200
+        self.edad_dias += dt_h / 24
 
     def ocultos(self) -> dict:
-        return {"k_cal_real": self.k_cal_real, "k_cyc_real": self.k_cyc_real,
-                "nominal": asdict(self.nominal)}
+        return {"f_cal": self.f_cal, "f_cic": self.f_cic, "escala_ciclado": self.escala_ciclado}
 
 
 def velocidad_carga(nivel: float) -> float:

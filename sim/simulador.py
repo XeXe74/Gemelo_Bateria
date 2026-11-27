@@ -19,7 +19,6 @@ from typing import Callable
 import pandas as pd
 
 from .activo import Activo, ContextoDecision
-from .bateria import ParametrosDegradacion
 from .generar_uso import DatosUso
 from .rutina import PASO
 
@@ -36,7 +35,7 @@ def politica_optimizada() -> Politica:
 
 
 def simular(datos: DatosUso, politica: Politica, seed_unidad: int = 1234,
-            parametros: ParametrosDegradacion | None = None) -> dict:
+            parametros: dict | None = None) -> dict:
     """Recorre el año entero de una vez (modo por lotes) con el mismo activo que el servicio."""
     act = Activo(datos, seed_unidad, parametros)
     while not act.terminado:

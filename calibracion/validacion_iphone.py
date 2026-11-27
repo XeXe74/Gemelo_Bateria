@@ -30,7 +30,7 @@ PERDIDA_REAL = 14.0  # puntos (86 % de salud)
 CICLOS_REALES = 610
 
 
-def historia(pasos: pd.DataFrame) -> tuple[float, float]:
+def historia(pasos: pd.DataFrame) -> tuple[float, float, EstadoDegradacion]:
     """Pérdida prevista (puntos) y ciclos equivalentes tras el almacén y DIAS_USO días de uso."""
     est = EstadoDegradacion(Leyes.cargar())
     for _ in range(DIAS_ALMACEN):
@@ -45,16 +45,23 @@ def historia(pasos: pd.DataFrame) -> tuple[float, float]:
         est.paso(anterior, niveles[j], temps[j], 0.25)
         ciclos += abs(niveles[j] - anterior) / 200
         anterior = niveles[j]
-    return 100 * (1 - est.salud), ciclos
+    return 100 * (1 - est.salud), ciclos, est
+
+
+def politica_es_prediccion(nombre: str) -> bool:
+    return nombre.startswith("carga optimizada")
 
 
 def main() -> None:
+    prediccion = None
     datos = leer_uso(ruta_uso(0))
     resultados = {}
     for nombre, politica in (("carga optimizada (predicción)", politica_optimizada()),
                              ("siempre 100 %", politica_fija(100)), ("siempre 80 %", politica_fija(80))):
         pasos = simular(datos, politica)["pasos"]
-        perdida, ciclos = historia(pasos)
+        perdida, ciclos, est = historia(pasos)
+        if politica_es_prediccion(nombre):
+            prediccion = est
         error = abs(perdida - PERDIDA_REAL) / PERDIDA_REAL
         resultados[nombre] = (perdida, ciclos, error)
         print(f"{nombre}: pérdida prevista {perdida:.1f} puntos (real {PERDIDA_REAL:.0f}), error relativo {100 * error:.0f} %, "
@@ -62,6 +69,14 @@ def main() -> None:
     perdida, _, error = resultados["carga optimizada (predicción)"]
     print(f"\nValidación: {'CUMPLE' if error < 0.20 else 'NO CUMPLE'} el criterio del 20 % "
           f"(salud prevista {100 - perdida:.1f} %, real 86 %)")
+    # Reparto de la pérdida de la historia entre calendario y ciclado, según el modelo: lo usan el factor propio
+    # del gemelo y la batería simulada para empezar en el mismo estado que la batería real.
+    leyes = Leyes.cargar()
+    leyes.historia_inicial = {"perdida_cal": prediccion.perdida_cal, "perdida_cic": prediccion.perdida_cic,
+                              "dias": DIAS_ALMACEN + DIAS_USO}
+    leyes.guardar()
+    print(f"Historia inicial del modelo: calendario {100 * prediccion.perdida_cal:.1f} puntos, "
+          f"ciclado {100 * prediccion.perdida_cic:.1f} puntos (guardada en gemelo/parametros/mod002.json)")
     pd.DataFrame([{"estrategia": k, "perdida_prevista": round(v[0], 2), "ciclos": round(v[1]), "error_rel": round(v[2], 3)}
                   for k, v in resultados.items()]).to_csv(RAIZ / "data" / "calibracion" / "validacion_iphone.csv", index=False)
 

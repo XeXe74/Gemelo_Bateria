@@ -22,7 +22,7 @@ from datetime import date, datetime, timedelta
 import numpy as np
 import pandas as pd
 
-from .bateria import BateriaSimulada, ParametrosDegradacion, velocidad_carga
+from .bateria import BateriaSimulada, velocidad_carga
 from .generar_uso import DIAS, TEMP_ACTIVIDAD, DatosUso
 from .rutina import PASO
 
@@ -43,7 +43,7 @@ class ContextoDecision:
 
 class Activo:
     def __init__(self, datos: DatosUso, seed_unidad: int = 1234,
-                 parametros: ParametrosDegradacion | None = None):
+                 parametros: dict | None = None):
         self.datos = datos
         cfg = datos.cfg
         self.cfg = cfg
@@ -79,8 +79,7 @@ class Activo:
 
         # --- Estado ----------------------------------------------------------------
         self.soh0 = cfg["movil"]["salud_inicial"]
-        self.bat = BateriaSimulada(self.soh0, cfg["movil"]["edad_dias_inicial"],
-                                   parametros or ParametrosDegradacion(), self.rng_unidad)
+        self.bat = BateriaSimulada(self.soh0, cfg["movil"]["edad_dias_inicial"], self.rng_unidad, parametros)
         self.nivel = float(cfg["simulacion"]["nivel_inicial"])
         self.tope = 100
         self.optimizada = False  # carga optimizada de iOS en la carga nocturna
