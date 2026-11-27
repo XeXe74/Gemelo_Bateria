@@ -13,7 +13,7 @@ las decisiones. Así, dos estrategias con el mismo Excel viven exactamente los m
 """
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import datetime, timedelta
 from typing import Callable
 
 import pandas as pd
@@ -35,8 +35,11 @@ def politica_optimizada() -> Politica:
 
 
 def simular(datos: DatosUso, politica: Politica, seed_unidad: int = 1234,
-            parametros: dict | None = None) -> dict:
-    """Recorre el año entero de una vez (modo por lotes) con el mismo activo que el servicio."""
+            parametros: dict | None = None, observador: Callable[[datetime, dict], None] | None = None) -> dict:
+    """Recorre el año entero de una vez (modo por lotes) con el mismo activo que el servicio.
+
+    observador, si se indica, recibe en cada paso el instante y la medida que publicaría el móvil (nivel,
+    conexión, modo Dormir, temperatura y salud de Ajustes) más el límite aplicado: es lo que ve el gemelo."""
     act = Activo(datos, seed_unidad, parametros)
     while not act.terminado:
         ctx = act.inicio_paso()
@@ -46,6 +49,8 @@ def simular(datos: DatosUso, politica: Politica, seed_unidad: int = 1234,
                 act.fijar_limite(100, optimizada=True)
             else:
                 act.fijar_limite(int(r))
+        if observador is not None:
+            observador(act.instante, act.medida() | {"limite": act.tope})
         act.fin_paso()
 
     pasos = pd.DataFrame(act.filas)
